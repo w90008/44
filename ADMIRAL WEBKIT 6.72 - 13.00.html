@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://admiralps4.pages.dev/?utm_source=chatgpt.com -->
+<html lang="en" manifest="cache.appcache"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIRAL WEBKIT 6.72 - 13.00</title>
+<style>
+  /* Halaman statis (tanpa animasi): PNG utuh Sanji Diable Jambe buatan user
+     di tengah layar + status exploit + spinner loading bulat.
+     Elemen wajib chain TIDAK diubah: #state, #out, import chain_poops.js. */
+  *{box-sizing:border-box}
+  html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#07090d}
+  body{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif}
+
+  /* Gambar mengisi layar (rasio asli dijaga), glow halus statis. */
+  #art{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+       max-width:100vw;max-height:100vh;z-index:1;
+       filter:drop-shadow(0 0 24px rgba(255,94,0,.18))}
+
+  /* HUD status exploit di bawah tengah. */
+  #hud{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);
+       z-index:12;text-align:center;pointer-events:none}
+  #brand{font-size:11px;font-weight:700;letter-spacing:.22em;color:#fff;
+         text-shadow:0 1px 4px rgba(0,0,0,.95)}
+  #credits{margin-top:5px;font:10px/1.25 Arial,sans-serif;color:#fff;
+           text-shadow:0 1px 4px rgba(0,0,0,.95);
+           letter-spacing:.03em;white-space:nowrap}
+  #cache{margin-top:5px;font:11px/1.25 Arial,sans-serif;color:#728095;
+         min-height:14px;letter-spacing:.04em}
+  #cache.ok{color:#68aa83}
+  #cache.warn{color:#c5a75f}
+  #cache.bad{color:#c87870}
+  #state{margin-top:6px;font-size:19px;font-weight:700;color:#e6ebf2;
+         min-height:28px;text-shadow:0 0 8px rgba(0,255,204,.35)}
+  #state.warn{color:#d8c07f}
+  #state.ok{color:#7fd0a0}
+  #state.bad{color:#d08a7f}
+
+  /* Spinner bulat di bawah status. */
+  #spin{width:34px;height:34px;margin:12px auto 0;
+        border:4px solid rgba(255,190,80,.18);
+        border-top-color:#ffbe50;border-radius:50%;
+        animation:rot 1s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+
+  /* Log chain (debug): disembunyikan; tampil kalau ada "failed" atau ?debug=1. */
+  #out{display:none;white-space:pre-wrap;font:11px/1.4 Consolas,monospace;
+       background:rgba(10,13,18,.92);border-top:1px solid #1e2732;
+       position:absolute;left:0;right:0;bottom:0;height:38vh;
+       overflow-y:auto;padding:8px 12px;z-index:14;color:#9fb3c8}
+  #out.visible{display:block}
+</style>
+</head>
+<body>
+<img id="art" src="./ADMIRAL WEBKIT 6.72 - 13.00_files/sanji.png" alt="Sanji Diable Jambe">
+<div id="hud">
+  <div id="brand">ADMIRAL WEBKIT 6.72 - 13.00</div>
+  <div id="credits">Special thanks to sonicps, egycnq, Theflow0, sleirsgoevy, abc, Al-Azif, ntfargo, zecoxao, slopkit &amp; contributors</div>
+  <div id="cache" class="bad">offline cache unavailable</div>
+  <div id="state" class="">open this page in the PS4 browser</div>
+  <div id="spin" style="display: none;"></div>
+</div>
+<div id="out"></div>
+
+<script>
+  // AppCache masih merupakan cache offline native pada browser PS4. Jangan
+  // swap/reload otomatis saat exploit berjalan: update aktif pada navigasi
+  // berikutnya dan tidak boleh mencampur module lama dengan asset baru.
+  (function () {
+    var cacheEl = document.getElementById('cache');
+    var ac = window.applicationCache;
+
+    function cacheStatus(text, kind) {
+      cacheEl.textContent = text;
+      cacheEl.className = kind || '';
+    }
+
+    if (!ac) {
+      cacheStatus('offline cache unavailable', 'bad');
+      return;
+    }
+
+    if (navigator.onLine === false) {
+      cacheStatus('offline - loaded from cache', 'ok');
+    }
+
+    ac.addEventListener('checking', function () {
+      cacheStatus('checking offline cache...');
+    }, false);
+    ac.addEventListener('downloading', function () {
+      cacheStatus('saving files for offline use...', 'warn');
+    }, false);
+    ac.addEventListener('progress', function (event) {
+      var suffix = event.total ? ' (' + event.loaded + '/' + event.total + ')' : '';
+      cacheStatus('saving offline cache' + suffix, 'warn');
+    }, false);
+    ac.addEventListener('cached', function () {
+      cacheStatus('offline cache ready', 'ok');
+    }, false);
+    ac.addEventListener('noupdate', function () {
+      cacheStatus('offline cache ready', 'ok');
+    }, false);
+    ac.addEventListener('updateready', function () {
+      cacheStatus('cache updated - reload after this run', 'warn');
+    }, false);
+    ac.addEventListener('obsolete', function () {
+      cacheStatus('offline cache obsolete', 'bad');
+    }, false);
+    ac.addEventListener('error', function () {
+      cacheStatus(navigator.onLine === false ?
+        'offline cache active' : 'offline cache failed - keep internet connected',
+        navigator.onLine === false ? 'ok' : 'bad');
+    }, false);
+  })();
+
+  // Status chain: beri warna sesuai isi; tampilkan log saat ada kegagalan.
+  (function () {
+    const stateEl = document.getElementById('state');
+    const outEl = document.getElementById('out');
+    setInterval(function () {
+      const t = stateEl.textContent || '';
+      stateEl.className =
+        /failed|abort|missing/i.test(t) ? 'bad' :
+        /done|running|ok/i.test(t) ? 'ok' :
+        /warn|attempt/i.test(t) ? 'warn' : '';
+      if (/failed|abort/i.test(t)) outEl.classList.add('visible');
+    }, 400);
+  })();
+</script>
+<script src="./ADMIRAL WEBKIT 6.72 - 13.00_files/background-music.js.download"></script><audio id="background-music" src="/music_background.mp3" loop="" preload="auto" autoplay="autoplay" style="display: none;"></audio>
+<script src="./ADMIRAL WEBKIT 6.72 - 13.00_files/firmware-matrix.js.download"></script>
+<script src="./ADMIRAL WEBKIT 6.72 - 13.00_files/multifw-router.js.download"></script>
+<script>
+  // ?debug=1 menampilkan log lengkap chain (untuk troubleshooting).
+  if (new URLSearchParams(location.search).get('debug') === '1') {
+    document.getElementById('out').classList.add('visible');
+  }
+</script>
+
+
+</body></html>
