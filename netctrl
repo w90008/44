@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PS4 13.00 — GoldHEN Loader</title>
+<style>
+  body {
+    background: #0a0a0f;
+    color: #d8d8e0;
+    font-family: monospace;
+    margin: 0;
+    padding: 24px;
+  }
+  #title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffd93d;
+  }
+  #sub {
+    font-size: 13px;
+    color: #8a8a95;
+    margin: 4px 0 16px 0;
+  }
+  #log {
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #6bcf7f;
+    word-wrap: break-word;
+  }
+</style>
+</head>
+<body>
+  <div id="title">PS4 poops — GoldHEN Loader 13.00</div>
+  <div id="sub">CVE-2017-7117 (userland) &rarr; Netctrl/Poopsploit (kernel) &rarr; goldhen.bin via HTTP</div>
+  <pre id="log"></pre>
+
+  <!-- Urutan pemuatan WAJIB:
+       1. browser-shim.js  : pengganti environment Vue (log/include/jsmaf)
+       2. types.js         : framework BigInt/mem/fn/rop/syscalls (global)
+       3. defs.js          : trigger UAF CVE-2017-7117 + struct
+       4. userland.js      : UAF -> ARW -> leak jsc/libc/libkernel (langsung jalan)
+       5. kernel.js        : offset kernel per FW + helper
+       6. check-jailbroken.js
+       7. binloader.js     : BinLoader (payload raw/ELF) + prioritas HTTP
+       8. netctrl_c0w_twins.js : kernel exploit (entry: netctrl_exploit)
+       9. main.js          : driver — fetch goldhen.bin, jalankan rantai -->
+  <script src="js/browser-shim.js"></script>
+  <script src="js/types.js"></script>
+  <script src="js/defs.js"></script>
+  <script src="js/userland.js"></script>
+  <script src="js/kernel.js"></script>
+  <script src="js/check-jailbroken.js"></script>
+  <script src="js/binloader.js"></script>
+  <script src="js/netctrl_c0w_twins.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
